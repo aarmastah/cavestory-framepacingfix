@@ -1,0 +1,8 @@
+[FrameFix]
+; 0 = use the game's own logic rate (50 in vanilla, or whatever a mod sets).
+; Set e.g. 60 to force an exact rate.
+FPS=0
+; 1 = smooth motion at your monitor's refresh rate, 0 = off.
+Interpolation=1
+; 0 = crisp text without ClearType, 1 = use Windows' font smoothing.
+ClearType=0

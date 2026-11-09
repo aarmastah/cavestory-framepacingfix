@@ -1,0 +1,9 @@
+LIBRARY dinput.dll
+EXPORTS
+    DirectInputCreateA=Proxy_DirectInputCreateA@16
+    DirectInputCreateW=Proxy_DirectInputCreateW@16
+    DirectInputCreateEx=Proxy_DirectInputCreateEx@20
+    DllCanUnloadNow=Proxy_DllCanUnloadNow@0 PRIVATE
+    DllGetClassObject=Proxy_DllGetClassObject@12 PRIVATE
+    DllRegisterServer=Proxy_DllRegisterServer@0 PRIVATE
+    DllUnregisterServer=Proxy_DllUnregisterServer@0 PRIVATE
