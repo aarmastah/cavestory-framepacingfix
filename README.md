@@ -1,6 +1,6 @@
 # Cave Story frame pacing + frame interpolation fix (for the 2004 freeware Doukutsu.exe and mods built on it)
 
-[img].media/outerwall.webp[/img]
+![Outer Wall Demo](.media/outerwall.webp)
 
 ## INSTALL
 
