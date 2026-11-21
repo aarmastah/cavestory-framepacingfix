@@ -50,6 +50,10 @@
  *     [FrameFix]
  *     FPS=0            ; 0 = game's own rate, or force e.g. 60 / 59.94
  *     Interpolation=1  ; 0 = pacing fix only, present at the game's rate
+ *     RenderFPS=0      ; 0 = one frame per display refresh, in sync (vsync)
+ *                      ; N = show N frames per second on a precise timer,
+ *                      ;     not synced to the display (vsync off). The game
+ *                      ;     logic rate is unaffected. Needs Interpolation=1.
  *     ClearType=0      ; 0 = crisp, non-antialiased text (default)
  *                      ; 1 = leave text to Windows' font smoothing setting
  *
@@ -224,6 +228,7 @@ static LONGLONG g_freq;
 static LONGLONG g_override_us;
 static BOOL     g_interpEnabled = TRUE;
 static BOOL     g_allowClearType = FALSE;
+static double   g_renderFps;          /* framefix.ini RenderFPS, 0 = sync to display */
 static HANDLE   g_timer;
 
 static LONGLONG Now(void)
@@ -902,6 +907,15 @@ static void InitVSync(HWND hwnd)
     if (hz < 24 || hz > 1000) hz = 60;
     g_period = g_freq / hz;
     g_lastVB = Now();
+    if (g_renderFps > 0) {
+        /* Manual frame rate: present on our own precise timer, no vsync waits. */
+        g_vsMode = VS_TIMER;
+        g_period = (LONGLONG)((double)g_freq / g_renderFps + 0.5);
+        if (g_period < 1) g_period = 1;
+        Log("vsync off: fixed %d.%03d fps\r\n", (int)g_renderFps,
+            (int)((g_renderFps - (int)g_renderFps) * 1000));
+        return;
+    }
     {
         LONGLONG vb, p;
         if (!g_DwmFlush || !DwmTiming(&vb, &p)) g_vsMode = VS_DDRAW;
@@ -1233,6 +1247,9 @@ static void LoadConfig(void)
         g_override_us = (LONGLONG)(1000000.0 / fps + 0.5);
     g_interpEnabled = GetPrivateProfileIntA("FrameFix", "Interpolation", 1, path) != 0;
     g_allowClearType = GetPrivateProfileIntA("FrameFix", "ClearType", 0, path) != 0;
+    GetPrivateProfileStringA("FrameFix", "RenderFPS", "0", val, sizeof val, path);
+    fps = atof(val);
+    g_renderFps = (fps >= 1.0 && fps <= 1000.0) ? fps : 0;
 }
 
 static void ApplyPatch(void)

@@ -4,5 +4,9 @@
 FPS=0
 ; 1 = smooth motion at your monitor's refresh rate, 0 = off.
 Interpolation=1
+; 0 = one frame per monitor refresh with vsync (default).
+; Any other number = show that many frames per second, vsync off
+; (game speed is unaffected; needs Interpolation=1).
+RenderFPS=0
 ; 0 = crisp text without ClearType, 1 = use Windows' font smoothing.
 ClearType=0
