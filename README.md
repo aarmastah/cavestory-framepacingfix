@@ -5,35 +5,36 @@
 ## INSTALL
 
   Copy dinput.dll into the same folder as the game's .exe (works for mods
-  too, whatever the exe is called). To uninstall, delete dinput.dll.
+  too). To uninstall, delete dinput.dll.
 
 ## WHAT IT DOES
 
   1. Steady game speed
      The game limits its speed with GetTickCount() and Sleep(1), which on
-     modern Windows only tick every ~15.6 ms, so frames came out at 16 / 31 ms
-     instead of a steady 20 ms. This is replaced by a precise timer. The game
-     logic runs at exactly its intended rate (50 per second in vanilla).
+     modern Windows only ticks every ~15.6 ms, so frames came out at 16 / 31 ms
+     instead of a steady 20 ms (for 50 fps). This is replaced by a precise timer.
+	 The game logic now runs at exactly its intended rate (50 per second in
+	 vanilla).
 
   2. Frame interpolation (on by default)
-     The game logic still runs at 50 per second, but a frame is shown on
-     every refresh of your monitor (60, 120, 144, 240 Hz...), timed to the
-     display. Each shown frame is drawn by the game's own drawing code with the
-     camera, Quote, enemies, bullets, effects, backgrounds and water level
-     placed part-way between their positions in the last two game ticks, so
-     motion is smooth and evenly spaced. Game speed, physics and timing are
-     not affected: positions are only changed temporarily while a frame is
-     drawn, then restored exactly.
+     The game logic still runs at 50 frames (ticks) per second, but a frame
+	 is now shown on every refresh of your monitor (60, 120, 144, 240 Hz...),
+	 timed to the display (vsync). Each shown frame is drawn by the game's own
+	 drawing code, with the camera, Quote, enemies, bullets, effects, backgrounds,
+	 and water level placed part-way between their positions in the last two game
+	 ticks, so motion is smoothed and evenly spaced. Game speed, physics and timing
+	 are not affected; positions are only changed temporarily while a frame is drawn,
+	 then restored exactly.
 
-     The scrolling cloud backgrounds (bkMoon / bkFog: Outer Wall, Balcony,
-     Throne Room, Clock Room...) are redrawn so each cloud layer moves
-     smoothly at its own speed. If a mod has changed how those backgrounds
-     are drawn, the game's own drawing is used instead.
+     The scrolling cloud backgrounds (bkMoon / bkFog: Outer Wall, Balcony, Throne
+	 Room, Clock Room...) are redrawn so each cloud layer moves smoothly at their own
+	 speed. If a mod is being played and it has changed how those backgrounds are drawn,
+	 the mod's own drawing is used instead.
 
-     The HUD, text boxes, menus and fades are shown as the game drew them.
-     Things that jump far in one tick (teleports, room changes) aren't
-     blended. Screens with no moving world (title, inventory, map) are shown
-     as-is, but still in sync with the display.
+     The HUD, text boxes, menus and fades are shown as the game drew them. Things that
+	 jump far in one tick (teleports, room changes) aren't blended. Screens with no
+	 moving world (title, inventory, map) are shown as-is, but still in sync with the
+	 display.
 
      Interpolation shows each game tick spread over the following 20 ms, so
      it adds up to one game tick (about 10 ms on average) of display delay.
@@ -53,29 +54,32 @@
       [FrameFix]
       FPS=0
       Interpolation=1
+      RenderFPS=0
       ClearType=0
+
 FPS=0 use the game's own rate (50 in vanilla, or whatever a mod sets). Any other value forces that logic rate, e.g. FPS=60 for a mod meant to run at 60 (decimals like 59.94 work).
   Interpolation=1  smooth motion at your monitor's refresh rate.
   Interpolation=0  steady game speed only; the game shows its own frames.
+  RenderFPS=0 one frame per monitor refresh with vsync (default). Any other number = show that many frames per second, turns vsync off.
   ClearType=0      crisp, non-smoothed text (default).
   ClearType=1      leave the game's text to Windows' font smoothing setting.
 
 ## MODS
 
-  The frame interval is read from the game's code every tick, so mods that
-  change the frame rate keep their speed. Mods that add their own drawing
-  are still shown (that drawing just isn't interpolated). If a mod draws
+  The frame interval is read from the game's code on every tick, so mods that
+  change the frame rate keep their intended speed. Mods that add their own
+  drawing are still shown (that drawing just isn't interpolated). If a mod draws
   world objects with its own custom code, those objects may look slightly
   jittery next to the smooth camera; set Interpolation=0 for that mod.
 
   The fix assumes the standard Doukutsu.exe layout (mods made with the usual
   tools keep it). Engine ports such as CSE2, NXEngine, doukutsu-rs or
-  Cave Story+ don't use it.
+  Cave Story+ don't use it, so this fix is not compatible with those.
 
 ## NOTES
 
-  * Works alongside DirectDraw wrappers such as dgVoodoo2 or DDrawCompat
-    (it doesn't replace ddraw.dll).
+  * Works alongside DirectDraw wrappers such as dgVoodoo2, DDrawCompat, 
+    and d7vk (it doesn't replace ddraw.dll).
   * Display sync uses the Windows compositor (DWM). If that isn't available it
     falls back to DirectDraw's vertical-blank wait, then to a timer at the
     monitor's refresh rate.
@@ -83,4 +87,5 @@ FPS=0 use the game's own rate (50 in vanilla, or whatever a mod sets). Any other
 ## BUILD FROM SOURCE (MinGW, 32-bit)
 
   i686-w64-mingw32-gcc -O2 -shared -s -static-libgcc -o dinput.dll framefix.c dinput.def -lwinmm -luser32 -lgdi32 -Wl,--enable-stdcall-fixup
+
 
